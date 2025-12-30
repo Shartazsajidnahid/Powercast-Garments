@@ -1,0 +1,48 @@
+
+R version 3.2.2 (2015-08-14) -- "Fire Safety"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(forecast)
+Loading required package: zoo
+
+Attaching package: ‘zoo’
+
+The following objects are masked from ‘package:base’:
+
+    as.Date, as.Date.numeric
+
+Loading required package: timeDate
+This is forecast 7.3 
+
+Warning messages:
+1: package ‘forecast’ was built under R version 3.2.5 
+2: package ‘zoo’ was built under R version 3.2.5 
+> setwd('/Users/hyunah/SVN_repo/hyunahs-code/PowerGrid/code/PowerCast/code/tmp/')
+> X = read.csv('X.txt', header=F, stringsAsFactors=F)
+> X = as.numeric(X)
+> n_d_pred = read.csv('n_d_pred.txt', header=F, stringsAsFactors=F)
+> n_d_pred = as.numeric(n_d_pred)
+> u_freq = read.csv('u_freq.txt', header=F, stringsAsFactors=F)
+> u_freq = as.numeric(u_freq)
+> mod = auto.arima(ts(X, frequency=u_freq)) # for u vector
+> f = forecast(mod, h=n_d_pred) # for u vector - 2 days
+> write.table(f$mean, 'arima_Xp.txt', row.names=F, col.names=F)
+> 
+> proc.time()
+   user  system elapsed 
+  3.162   0.147   3.309 
