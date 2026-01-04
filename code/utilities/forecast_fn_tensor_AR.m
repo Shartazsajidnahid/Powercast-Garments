@@ -49,9 +49,6 @@ for r_idx = 1: r
 end
 
 
-
-
-
 M_new.U{1} = M.U{1};
 M_new.U{2} = M.U{2};
 M_new.U{3} = M.U{3};

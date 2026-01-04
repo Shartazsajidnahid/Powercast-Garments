@@ -89,7 +89,7 @@ elseif strcmp(dataname, 'Garments')
     % Dataname = 'data_02222017_int3_data.mat';
     garments_data = load([Dir Dataname]);
     garments_data = garments_data.data;
-    garments_data = garments_data(1:336, :);
+    % garments_data = garments_data(1:336, :);
 
 
     Data_time_name = 'int3_dates.mat';
@@ -99,32 +99,38 @@ elseif strcmp(dataname, 'Garments')
     end
     timestamp_days = unique(timestamp_fin);
 
-    timestamp_days = timestamp_days(1:14);
+    % timestamp_days = timestamp_days(1:14);
+    timestamp_days = timestamp_days(1:10);
     
     
     start_pt = 1;%10%13;
-    n_d_removed = 3;
+    n_d_removed = 0;
     % end_pt = 330 - 24*n_d_removed - 24*n_d_pred;%%%%660 - 24*n_d_pred;%657 - 24*n_d_pred%660 - 24*n_d_pred;% 660;
-    end_pt = 250;%%%%660 - 24*n_d_pred;%657 - 24*n_d_pred%660 - 24*n_d_pred;% 660;
+    % end_pt = 250;%%%%660 - 24*n_d_pred;%657 - 24*n_d_pred%660 - 24*n_d_pred;% 660;
+    end_pt = 60;%%%%660 - 24*n_d_pred;%657 - 24*n_d_pred%660 - 24*n_d_pred;% 660;
     
     
     % garments columns
-    V_real = garments_data(:,1);
-    I_real = garments_data(:,2);
-    V_imag = garments_data(:,3);
-    I_imag = garments_data(:,4);
+    % V_real = garments_data(:,3);
+    % I_real = garments_data(:,4);
+    % V_imag = garments_data(:,5);
+    % I_imag = garments_data(:,7);
+
+    V_real = garments_data(:,4);
+    I_real = 0.5 * (garments_data(:,4).^2) .* (garments_data(:,7).^2);
 
 
     % input data
     V_real1 = V_real(start_pt:end_pt);
     I_real1 = I_real(start_pt:end_pt);
-    V_imag1 = V_imag(start_pt:end_pt);
-    I_imag1 = I_imag(start_pt:end_pt);
+    % V_imag1 = V_imag(start_pt:end_pt);
+    % I_imag1 = I_imag(start_pt:end_pt);
     
     
     
     t_tot = length(V_real1);
-    t_d = 10; % hourly basis: 24 hours/day
+    % t_d = 10; % hourly basis: 24 hours/day
+    t_d = 6; % hourly basis: 24 hours/day
     n_d = t_tot/t_d; % hourly basis
     
     
@@ -133,7 +139,9 @@ elseif strcmp(dataname, 'Garments')
     
     % timestamp for data1
     label_tmp_unit = {'F' 'S' 'S' 'M' 'T' 'W' 'T'};
+    % label_tmp_unit = {'F' 'S' 'S' 'M' };
     label_tmp = repmat(label_tmp_unit, 1,floor(n_d/7));
+    % label_tmp = repmat(label_tmp_unit, 1,floor(n_d/4));
     label_tmp = [label_tmp label_tmp{1:n_d-size(label_tmp,2)}];
     
     k = 1;
@@ -165,12 +173,12 @@ elseif strcmp(dataname, 'Garments')
     %%%%% ground-truth
     start_pt = 1;%10%13;
     % end_pt = 660 - 24*n_d_removed;%%%%660%657%660;% 660; % V_real is weird - too low for the last two days! skip these!
-    end_pt = 310;
+    end_pt = 90;
     
     V_real2 = V_real(start_pt:end_pt);
     I_real2 = I_real(start_pt:end_pt);
-    V_imag2 = V_imag(start_pt:end_pt);
-    I_imag2 = I_imag(start_pt:end_pt);
+    % % % % V_imag2 = V_imag(start_pt:end_pt);
+    % % % % I_imag2 = I_imag(start_pt:end_pt);
     %%%%%%
     
     
@@ -279,20 +287,24 @@ data_proc_method = 1;
 window_size = 3; % should be odd number
 % sigma = 0.5;
 
+V_imag1 = 1; I_imag1 = 1;
+V_imag2 = 1; I_imag2 = 1;
+
 myTensor = construct_tensor(V_real1,I_real1,V_imag1,I_imag1,n_d,t_d,data_proc_method,window_size,sigma, dataname);
+
 
 
 
 % let's plot the parameters - tensor values
 G = myTensor(:,:,1);
 alpha_r = myTensor(:,:,2);
-B = myTensor(:,:,3);
-alpha_i = myTensor(:,:,4);
+% B = myTensor(:,:,3);
+% alpha_i = myTensor(:,:,4);
 
 G_mat = reshape(G',1,size(G,1)*size(G,2));
 alpha_r_mat = reshape(alpha_r',1,size(alpha_r,1)*size(alpha_r,2));
-B_mat = reshape(B',1,size(B,1)*size(B,2));
-alpha_i_mat = reshape(alpha_i',1,size(alpha_i,1)*size(alpha_i,2));
+% B_mat = reshape(B',1,size(B,1)*size(B,2));
+% alpha_i_mat = reshape(alpha_i',1,size(alpha_i,1)*size(alpha_i,2));
 
 figure;
 subplot(4,1,1); plot(G_mat, 'linewidth',linewidth_in);hold on; title('G');
@@ -304,16 +316,16 @@ subplot(4,1,2); plot(alpha_r_mat, 'linewidth',linewidth_in);hold on;title('alpha
 for i = 1: ceil(length(G_mat)/24)
     plot([0+(i-1)*24 0+(i-1)*24], [min(alpha_r_mat) max(alpha_r_mat)], ':m');
 end
-set(gca, 'fontsize', fontsize_in);
-subplot(4,1,3); plot(B_mat, 'linewidth',linewidth_in);hold on;title('B');
-for i = 1: ceil(length(G_mat)/24)
-    plot([0+(i-1)*24 0+(i-1)*24], [min(B_mat) max(B_mat)], ':m');
-end
-set(gca, 'fontsize', fontsize_in);
-subplot(4,1,4); plot(alpha_i_mat, 'linewidth',linewidth_in); hold on;title('alpha_i');
-for i = 1: ceil(length(G_mat)/24)
-    plot([0+(i-1)*24 0+(i-1)*24], [min(alpha_i_mat) max(alpha_i_mat)], ':m');
-end
+% % % set(gca, 'fontsize', fontsize_in);
+% % % subplot(4,1,3); plot(B_mat, 'linewidth',linewidth_in);hold on;title('B');
+% % % for i = 1: ceil(length(G_mat)/24)
+% % %     plot([0+(i-1)*24 0+(i-1)*24], [min(B_mat) max(B_mat)], ':m');
+% % % end
+% % % set(gca, 'fontsize', fontsize_in);
+% % % subplot(4,1,4); plot(alpha_i_mat, 'linewidth',linewidth_in); hold on;title('alpha_i');
+% % % for i = 1: ceil(length(G_mat)/24)
+% % %     plot([0+(i-1)*24 0+(i-1)*24], [min(alpha_i_mat) max(alpha_i_mat)], ':m');
+% % % end
 set(gca, 'fontsize', fontsize_in);
 
 
