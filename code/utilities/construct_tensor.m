@@ -13,7 +13,7 @@ for day_idx = 1: n_d
     V_real_in = V_real((day_idx-1)*t_d+1:(day_idx-1)*t_d+t_d);
     I_real_in = I_real((day_idx-1)*t_d+1:(day_idx-1)*t_d+t_d);
     % V_imag_in = V_imag((day_idx-1)*t_d+1:(day_idx-1)*t_d+t_d);
-    % I_imag_in = I_imag((day_idx-1)*t_d+1:(day_idx-1)*t_d+t_d);
+    I_imag_in = I_imag((day_idx-1)*t_d+1:(day_idx-1)*t_d+t_d);
     
     if data_proc_method == 1 % CMU data
         for tt = 1: t_d
@@ -21,7 +21,7 @@ for day_idx = 1: n_d
             V_real_in_tmp = windowing_fn(V_real_in, tt, t_d, window_size, sigma);
             % V_imag_in_tmp = windowing_fn(V_imag_in, tt, t_d, window_size, sigma);
             I_real_in_tmp = windowing_fn(I_real_in, tt, t_d, window_size, sigma);
-            % I_imag_in_tmp = windowing_fn(I_imag_in, tt, t_d, window_size, sigma);
+            I_imag_in_tmp = windowing_fn(I_imag_in, tt, t_d, window_size, sigma);
             
             
             if strcmp(dataname, 'CMU')
@@ -44,6 +44,19 @@ for day_idx = 1: n_d
                 else
                     fit_G = b(2);
                 end
+
+                [b, ~, ~] = LinFit(V_real_in_tmp, I_imag_in_tmp);
+                if isnan(b(1))
+                    fit_alpha_i = 0;
+                else
+                    fit_alpha_i = b(1);
+                end
+
+                if isnan(b(2))
+                    fit_B = 0;
+                else
+                    fit_B = b(2);
+                end
                 
                 % [b, ~, ~] = LinFit(V_real_in_tmp, I_imag_in_tmp);
                 % fit_alpha_i = b(1);
@@ -59,8 +72,8 @@ for day_idx = 1: n_d
             
             myTensor(day_idx, tt,1) = fit_G;
             myTensor(day_idx, tt,2) = fit_alpha_r;
-            % myTensor(day_idx, tt,3) = fit_B;
-            % myTensor(day_idx, tt,4) = fit_alpha_i;
+            myTensor(day_idx, tt,3) = fit_B;
+            myTensor(day_idx, tt,4) = fit_alpha_i;
         end
         
     elseif data_proc_method == 2
